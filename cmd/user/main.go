@@ -7,8 +7,7 @@ import (
 )
 
 func main() {
-
 	config := config.GetConfig()
 
-	fmt.Printf("App name: %v", config.Name)
+	fmt.Printf("App name: %v\n", config)
 }

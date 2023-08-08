@@ -5,7 +5,7 @@ tmp_dir = "tmp"
 [build]
 args_bin = ["debug"]
 bin = "./tmp/main"
-cmd = "go build -gcflags='all=-N -l' -o ./tmp/main ./cmd/main.go"
+cmd = "go build -gcflags='all=-N -l' -o ./tmp/main ./cmd/user/main.go"
 #full_bin = "dlv exec --continue --accept-multiclient --listen=:9080 --headless=true --api-version=2 --log ./tmp/main"
 delay = 1000
 exclude_dir = ["assets", "tmp", "vendor", "testdata"]
