@@ -5,12 +5,12 @@ import (
 )
 
 type (
-	App struct {
-		Name    string `env:"APP_NAME" envDefault:"Default"`
+	Module struct {
+		Name    string `env:"APP_NAME" envDefault:"module-user"`
 		Version string `env:"APP_VERSION" envDefault:"0.0.1"`
 	}
 
-	Http struct {
+	Grcp struct {
 		Host string `env-required:"true" env:"HTTP_HOST" envDefault:"localhost"`
 		Port string `env-required:"true" env:"HTTP_PORT" envDefault:"3000"`
 	}
@@ -24,7 +24,7 @@ type (
 	}
 
 	Config struct {
-		App
+		Module
 		Http
 		Log
 		MongoDb
