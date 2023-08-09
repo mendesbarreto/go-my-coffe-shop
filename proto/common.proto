@@ -1,0 +1,20 @@
+syntax="proto3";
+
+package api.v1.mycoffeshop.common;
+
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+option go_package = "github.com/mendesbarreto/go-my-coffe-shop/proto/gen";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  info: {
+    title: "My Coffe Shop API";
+    version: "0.1";
+  };
+  external_docs: {
+    url: "https://github.com/mendesbarreto/go-my-coffe-shop";
+    description: "My Coffe Shop API";
+  };
+  schemes: HTTPS;
+};

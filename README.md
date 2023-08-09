@@ -2,6 +2,14 @@
 
 I will try to build a simple backend for a coffee shop in go
 
+### Run the project
+
+First we need to install the project dependencies
+
+```bash
+brew install bufbuild/buf/buf
+```
+
 ## Tech Stack
 
 - [] gRPC for internal microservices communication

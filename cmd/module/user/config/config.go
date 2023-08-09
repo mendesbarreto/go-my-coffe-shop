@@ -11,8 +11,8 @@ type (
 	}
 
 	Grcp struct {
-		Host string `env-required:"true" env:"HTTP_HOST" envDefault:"localhost"`
-		Port string `env-required:"true" env:"HTTP_PORT" envDefault:"3000"`
+		Host string `env-required:"true" env:"GRCP_HOST" envDefault:"localhost"`
+		Port string `env-required:"true" env:"GRCP_PORT" envDefault:"3000"`
 	}
 
 	Log struct {
@@ -25,7 +25,7 @@ type (
 
 	Config struct {
 		Module
-		Http
+		Grcp
 		Log
 		MongoDb
 	}
