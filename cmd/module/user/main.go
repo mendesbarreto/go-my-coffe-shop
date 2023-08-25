@@ -12,6 +12,7 @@ import (
 
 	"github.com/mendesbarreto/go-my-coffe-shop/cmd/module/user/config"
 	handler "github.com/mendesbarreto/go-my-coffe-shop/internal/user"
+	"github.com/mendesbarreto/go-my-coffe-shop/pkg/interceptor"
 )
 
 func main() {
@@ -34,7 +35,8 @@ func main() {
 
 	slog.Info("User Module Config loaded", config)
 
-	grpcServer := grpc.NewServer()
+	loggerInterceptor := grpc.UnaryInterceptor(interceptor.GetUnaryGrpcInterceptor())
+	grpcServer := grpc.NewServer(loggerInterceptor)
 	serverAddress := fmt.Sprintf("%s:%s", config.Grcp.Host, config.Grcp.Port)
 	network := "tcp"
 
