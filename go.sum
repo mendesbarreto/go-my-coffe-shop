@@ -9,6 +9,8 @@ github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.2 h1:dygLcbEBA+t/P7ck6a8AkXv6juQ
 github.com/grpc-ecosystem/grpc-gateway/v2 v2.16.2/go.mod h1:Ap9RLCIJVtgQg1/BBgVEfypOAySvvlcpcVQkSzJCH4Y=
 github.com/grpc-ecosystem/grpc-gateway/v2 v2.17.0 h1:Rme6CE1aUTyV9WmrEPyGf1V+7W3iQzZ1DZkKnT6z9B0=
 github.com/grpc-ecosystem/grpc-gateway/v2 v2.17.0/go.mod h1:Hbb13e3/WtqQ8U5hLGkek9gJvBLasHuPFI0UEGfnQ10=
+github.com/grpc-ecosystem/grpc-gateway/v2 v2.17.1 h1:LSsiG61v9IzzxMkqEr6nrix4miJI62xlRjwT7BYD2SM=
+github.com/grpc-ecosystem/grpc-gateway/v2 v2.17.1/go.mod h1:Hbb13e3/WtqQ8U5hLGkek9gJvBLasHuPFI0UEGfnQ10=
 github.com/grpc/grpc-go v1.57.0 h1:gPBXoridFVbvOBxGSqucWiCsDAO0z2PO3fNEDnfFybM=
 github.com/grpc/grpc-go v1.57.0/go.mod h1:Sd+9RMTACXwmub0zcNY2c4arhtrbBYD1AUHI/dt16Mo=
 go.uber.org/automaxprocs v1.5.3 h1:kWazyxZUrS3Gs4qUpbwo5kEIMGe/DAvi5Z4tl2NW4j8=

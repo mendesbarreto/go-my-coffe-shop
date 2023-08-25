@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/caarlos0/env/v9 v9.0.0
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.17.0
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.17.1
 	go.uber.org/automaxprocs v1.5.3
 	google.golang.org/genproto/googleapis/api v0.0.0-20230822172742-b8732ec3820d
 	google.golang.org/grpc v1.57.0
