@@ -28,6 +28,7 @@ type (
 		Grcp
 		Log
 		MongoDb
+		EnableGRPCReflection bool `env:"ENABLE_GRPC_REFLECTION" envDefault:"true"`
 	}
 )
 

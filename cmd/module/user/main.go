@@ -8,20 +8,11 @@ import (
 
 	"go.uber.org/automaxprocs/maxprocs"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 	"log/slog"
 
 	"github.com/mendesbarreto/go-my-coffe-shop/cmd/module/user/config"
-	"github.com/mendesbarreto/go-my-coffe-shop/proto/gen"
+	handler "github.com/mendesbarreto/go-my-coffe-shop/internal/user"
 )
-
-type UserGRPCServer struct {
-	gen.UnimplementedUserServiceServer
-}
-
-func NewUserGRPCServer(server *grpc.Server) gen.UserServiceServer {
-	return nil
-}
 
 func main() {
 	//
@@ -47,10 +38,7 @@ func main() {
 	serverAddress := fmt.Sprintf("%s:%s", config.Grcp.Host, config.Grcp.Port)
 	network := "tcp"
 
-	userService := &UserGRPCServer{}
-	gen.RegisterUserServiceServer(grpcServer, userService)
-
-	reflection.Register(grpcServer)
+	handler.NewUserGRPCHandler(grpcServer, config)
 
 	lis, err := net.Listen(network, serverAddress)
 	if err != nil {
