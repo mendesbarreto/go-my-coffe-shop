@@ -20,7 +20,7 @@ type (
 	}
 
 	MongoDb struct {
-		URL string `env-required:"true" env:"MONGO_URL" envDefault:"mongodb://localhost:27017"`
+		URI string `env-required:"true" env:"MONGO_URI" envDefault:"mongodb://192.168.2.32:27017/module-user-go-local"`
 	}
 
 	Config struct {

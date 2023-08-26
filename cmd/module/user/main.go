@@ -12,6 +12,7 @@ import (
 
 	"github.com/mendesbarreto/go-my-coffe-shop/cmd/module/user/config"
 	handler "github.com/mendesbarreto/go-my-coffe-shop/internal/user"
+	"github.com/mendesbarreto/go-my-coffe-shop/pkg/infra"
 	"github.com/mendesbarreto/go-my-coffe-shop/pkg/interceptor"
 )
 
@@ -29,10 +30,12 @@ func main() {
 
 	slog.Info("User Module Starting up")
 
+	slog.Info("Starting Third Parties")
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	slog.Info("User Module context created")
 	config := config.GetConfig()
 
+	infra.SetupDependecies(ctx, config)
 	slog.Info("User Module Config loaded", config)
 
 	loggerInterceptor := grpc.UnaryInterceptor(interceptor.GetUnaryGrpcInterceptor())
@@ -46,6 +49,7 @@ func main() {
 	if err != nil {
 		slog.Info("Failed to start listen to address", err, "network", network, "serverAddress", serverAddress)
 		cancel()
+		infra.CleanUpDependcies(ctx)
 		<-ctx.Done()
 	}
 
@@ -56,6 +60,7 @@ func main() {
 			slog.Error("Problem to close server", err, "network", network, "address", serverAddress)
 		}
 		cancel()
+		infra.CleanUpDependcies(ctx)
 		<-ctx.Done()
 	}()
 
