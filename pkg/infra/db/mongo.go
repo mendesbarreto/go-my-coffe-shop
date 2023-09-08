@@ -22,21 +22,24 @@ func New(ctx context.Context, config *config.Config) *mongo.Client {
 
 	opt := options.Client().ApplyURI(config.MongoDb.URI)
 
-	mongoClient, err := mongo.Connect(ctx, opt)
+	client, err := mongo.Connect(ctx, opt)
 	if err != nil {
 		slog.Error("Problem to connect with mongodb", "URI", config.MongoDb.URI)
 		panic(err)
 	}
 
 	slog.Info("Testing Mongo Connection")
-	if err = mongoClient.Ping(ctx, nil); err != nil {
+	if err = client.Ping(ctx, nil); err != nil {
 		slog.Error("Problem to connect with mongodb", "URI", config.MongoDb.URI)
 		panic(err)
 	}
+
 	databaseName = config.Name
 
 	slog.Info("Mongo Client connection established at", "URI", config.MongoDb.URI)
-	return mongoClient
+	mongoClient = client
+
+	return client
 }
 
 func GetDatabase() *mongo.Database {

@@ -6,7 +6,7 @@ import (
 
 type (
 	Module struct {
-		Name    string `env:"APP_NAME" envDefault:"module-user"`
+		Name    string `env:"APP_NAME" envDefault:"module-user-go-local"`
 		Version string `env:"APP_VERSION" envDefault:"0.0.1"`
 	}
 
@@ -20,7 +20,7 @@ type (
 	}
 
 	MongoDb struct {
-		URI string `env-required:"true" env:"MONGO_URI" envDefault:"mongodb://192.168.2.32:27017/module-user-go-local?directConnection=true"`
+		URI string `env-required:"true" env:"MONGO_URI" envDefault:"mongodb://192.168.2.32:27017/?directConnection=true"`
 	}
 
 	Config struct {
