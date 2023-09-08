@@ -36,3 +36,6 @@ func NewUserGRPCHandler(grpcServer *grpc.Server, config *config.Config) *UserGRP
 func (u *UserGRPCHandler) SignIn(context.Context, *gen.SignInRequest) (*gen.SignInResponse, error) {
 	return &gen.SignInResponse{Token: "1234"}, nil
 }
+
+func (u *UserGRPCHandler) SignUp(context.Context, *gen.SignUpRequest) (*gen.SignUpResponse, error) {
+}

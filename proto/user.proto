@@ -9,11 +9,6 @@ import "common.proto";
 option go_package = "github.com/mendesbarreto/go-my-coffe-shop/proto/gen";
 
 
-message User {
-  string id = 1;
-  string name = 2;
-}
-
 message SignInRequest {
   string email = 1;
   string password = 2;
@@ -23,7 +18,29 @@ message SignInResponse {
   string token = 1;
 }
 
+message SignUpRequest {
+  string name = 1;
+  string email = 2;
+  string password = 3;
+}
+
+message SignUpResponse {
+  string userId = 1;
+  string token = 2;
+}
+
 service UserService {
+ rpc SignUp(SignUpRequest) returns (SignUpResponse) {
+    option (google.api.http) = {
+      post: "/v1/user/signup"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Sing Up"
+      description: "Sing Up"
+      tags: "User"
+    };
+ };
  rpc SignIn(SignInRequest) returns (SignInResponse) {
     option (google.api.http) = {
       post: "/v1/user/signin"

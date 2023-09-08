@@ -49,6 +49,40 @@
           "User"
         ]
       }
+    },
+    "/v1/user/signup": {
+      "post": {
+        "summary": "Sing Up",
+        "description": "Sing Up",
+        "operationId": "UserService_SignUp",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/userSignUpResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/userSignUpRequest"
+            }
+          }
+        ],
+        "tags": [
+          "User"
+        ]
+      }
     }
   },
   "definitions": {
@@ -94,6 +128,31 @@
     "userSignInResponse": {
       "type": "object",
       "properties": {
+        "token": {
+          "type": "string"
+        }
+      }
+    },
+    "userSignUpRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      }
+    },
+    "userSignUpResponse": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        },
         "token": {
           "type": "string"
         }
