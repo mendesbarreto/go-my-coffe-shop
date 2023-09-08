@@ -12,6 +12,7 @@ brew install bufbuild/buf/buf
 
 ## Tech Stack
 
+- [ ] Make gRPC gateway run [REST](https://github.com/grpc-ecosystem/grpc-gateway) Locally
 - [ ] gRPC for internal microservices communication
 - [ ] REST for external communication (I will try to pen a graphQL after, let's see)
 - [ ] MongoDB for the database
