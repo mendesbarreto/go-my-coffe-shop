@@ -16,6 +16,8 @@ github.com/grpc-ecosystem/grpc-gateway/v2 v2.17.1 h1:LSsiG61v9IzzxMkqEr6nrix4miJ
 github.com/grpc-ecosystem/grpc-gateway/v2 v2.17.1/go.mod h1:Hbb13e3/WtqQ8U5hLGkek9gJvBLasHuPFI0UEGfnQ10=
 github.com/grpc/grpc-go v1.57.0 h1:gPBXoridFVbvOBxGSqucWiCsDAO0z2PO3fNEDnfFybM=
 github.com/grpc/grpc-go v1.57.0/go.mod h1:Sd+9RMTACXwmub0zcNY2c4arhtrbBYD1AUHI/dt16Mo=
+github.com/grpc/grpc-go v1.58.0 h1:Ip1wElVfVEMSNHWtAn5ULtO/t6e4SzKjE/eYRyCG9eQ=
+github.com/grpc/grpc-go v1.58.0/go.mod h1:tgX3ZQDlNJGU96V6yHh1T/JeoBQ2TXdr43YbYSsCJk0=
 github.com/klauspost/compress v1.13.6 h1:P76CopJELS0TiO2mebmnzgWaajssP/EszplttgQxcgc=
 github.com/klauspost/compress v1.13.6/go.mod h1:/3/Vjq9QcHkK5uEr5lBEmyoZ1iFhe47etQ6QUkpK6sk=
 github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe h1:iruDEfMl2E6fbMZ9s0scYfZQ84/6SPL6zC8ACM2oIL0=
