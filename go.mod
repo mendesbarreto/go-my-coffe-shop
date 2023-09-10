@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/caarlos0/env/v9 v9.0.0
 	github.com/envoyproxy/protoc-gen-validate v1.0.2
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.17.1
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.0
 	go.mongodb.org/mongo-driver v1.12.1
 	go.uber.org/automaxprocs v1.5.3
 	golang.org/x/crypto v0.13.0
@@ -23,7 +23,7 @@ require (
 	github.com/xdg-go/scram v1.1.2 // indirect
 	github.com/xdg-go/stringprep v1.0.4 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20181117223130-1be2e3e5546d // indirect
-	golang.org/x/net v0.14.0 // indirect
+	golang.org/x/net v0.15.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
 	golang.org/x/sys v0.12.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
