@@ -53,9 +53,7 @@ func (u *UserGRPCHandler) SignIn(context.Context, *gen.SignInRequest) (*gen.Sign
 }
 
 func (u *UserGRPCHandler) SignUp(ctx context.Context, req *gen.SignUpRequest) (*gen.SignUpResponse, error) {
-	slog.Info("Validatin request data")
 	err := req.ValidateAll()
-	slog.Info("Request data validated")
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
