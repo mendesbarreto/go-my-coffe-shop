@@ -61,13 +61,11 @@ func (u *UserGRPCHandler) SignUp(ctx context.Context, req *gen.SignUpRequest) (*
 	}
 
 	var user *User
-	slog.Info("Get database and creating new collection")
 	userCollection := db.GetDatabase().Collection("user")
 	if userCollection == nil {
 		return nil, status.Error(codes.Internal, "Collection user was not found on the database")
 	}
 
-	slog.Info("Finding user")
 	err = userCollection.FindOne(ctx, bson.M{"email": req.GetEmail()}).Decode(&user)
 
 	if err != nil {
@@ -80,13 +78,11 @@ func (u *UserGRPCHandler) SignUp(ctx context.Context, req *gen.SignUpRequest) (*
 		return nil, status.Error(codes.AlreadyExists, "An user already Exists with this email")
 	}
 
-	slog.Info("Finding user 1")
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(req.GetPassword()), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "Problem to generate user password")
 	}
 
-	slog.Info("Finding user 2")
 	user = &User{ID: primitive.NewObjectID(), Name: req.GetName(), Email: req.GetEmail(), Password: string(passwordHash)}
 
 	_, err = userCollection.InsertOne(ctx, *user)
