@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 
+	"github.com/golang-jwt/jwt/v5"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -25,10 +26,10 @@ type UserGRPCHandler struct {
 var userGRPCHandler *UserGRPCHandler
 
 type User struct {
-	ID       primitive.ObjectID `bson:"_id,omitempty"`
-	Name     string             `bson:"name,omitepty"`
-	Email    string             `bson: "email,omitempty"`
-	Password string             `bson: "password"`
+	ID       primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
+	Name     string             `json:"name,omitempty" bson:"name,omitempty"`
+	Email    string             `json:"email,omitempty" bson:"email,omitempty"`
+	Password string             `json:"password,omitempty" bson:"password"`
 }
 
 func NewUserGRPCHandler(grpcServer *grpc.Server, config *config.Config) *UserGRPCHandler {
@@ -59,7 +60,9 @@ func (u *UserGRPCHandler) SignIn(ctx context.Context, req *gen.SignInRequest) (*
 	err = userCollection.FindOne(ctx, bson.M{"email": req.GetEmail()}).Decode(user)
 
 	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+		if err != mongo.ErrNoDocuments {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
 	}
 
 	if user == nil {
@@ -70,7 +73,14 @@ func (u *UserGRPCHandler) SignIn(ctx context.Context, req *gen.SignInRequest) (*
 		return nil, status.Error(codes.PermissionDenied, "The user or the password does not match the database")
 	}
 
-	return &gen.SignInResponse{Token: "1234"}, nil
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{"user": User{ID: user.ID, Name: user.Name, Email: user.Email}})
+
+	tokenString, err := token.SignedString([]byte(config.GetConfig().AuthSecrete))
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &gen.SignInResponse{Token: tokenString}, nil
 }
 
 func (u *UserGRPCHandler) SignUp(ctx context.Context, req *gen.SignUpRequest) (*gen.SignUpResponse, error) {

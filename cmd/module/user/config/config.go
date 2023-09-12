@@ -6,8 +6,9 @@ import (
 
 type (
 	Module struct {
-		Name    string `env:"APP_NAME" envDefault:"module-user-go-local"`
-		Version string `env:"APP_VERSION" envDefault:"0.0.1"`
+		Name        string `env:"APP_NAME" envDefault:"module-user-go-local"`
+		Version     string `env:"APP_VERSION" envDefault:"0.0.1"`
+		AuthSecrete string `env:"SECRETE_AUTH_TOKEN" envDefault:"TopScrect"`
 	}
 
 	Grcp struct {
