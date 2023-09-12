@@ -11,7 +11,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
-	"log/slog"
 
 	"github.com/mendesbarreto/go-my-coffe-shop/cmd/module/user/config"
 	"github.com/mendesbarreto/go-my-coffe-shop/pkg/infra/db"
@@ -48,7 +47,29 @@ func NewUserGRPCHandler(grpcServer *grpc.Server, config *config.Config) *UserGRP
 	return userServiceServer
 }
 
-func (u *UserGRPCHandler) SignIn(context.Context, *gen.SignInRequest) (*gen.SignInResponse, error) {
+func (u *UserGRPCHandler) SignIn(ctx context.Context, req *gen.SignInRequest) (*gen.SignInResponse, error) {
+	err := req.ValidateAll()
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	user := &User{}
+	userCollection := db.GetDatabase().Collection("user")
+
+	err = userCollection.FindOne(ctx, bson.M{"email": req.GetEmail()}).Decode(user)
+
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if user == nil {
+		return nil, status.Error(codes.PermissionDenied, "The user or the password does not match the database")
+	}
+
+	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.GetPassword())); err != nil {
+		return nil, status.Error(codes.PermissionDenied, "The user or the password does not match the database")
+	}
+
 	return &gen.SignInResponse{Token: "1234"}, nil
 }
 
