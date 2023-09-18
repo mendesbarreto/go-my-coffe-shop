@@ -56,7 +56,7 @@ service UserService {
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary: "Get something"
       description: "Say Hello"
-      tags: "User"
+      tags: "Basic"
     };
   };
 
@@ -68,7 +68,7 @@ service UserService {
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary: "Sing Up"
       description: "Sing Up"
-      tags: "User"
+      tags: "Auth"
     };
  };
  rpc SignIn(SignInRequest) returns (SignInResponse) {
@@ -79,7 +79,7 @@ service UserService {
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary: "Sign in"
       description: "Sign in"
-      tags: "User"
+      tags: "Auth"
     };
   };
  rpc GetUserDetails(GetUserDetailsRequest) returns (GetUserDetailsResponse) {
@@ -89,7 +89,7 @@ service UserService {
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary: "Get user Details"
       description: "This method will return all the information needed about the user"
-      tags: "User"
+      tags: "Details"
     };
   };
 }
