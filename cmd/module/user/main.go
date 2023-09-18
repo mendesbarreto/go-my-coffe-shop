@@ -4,16 +4,21 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"net/http"
 	"time"
 
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"go.uber.org/automaxprocs/maxprocs"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"log/slog"
 
 	"github.com/mendesbarreto/go-my-coffe-shop/cmd/module/user/config"
 	handler "github.com/mendesbarreto/go-my-coffe-shop/internal/user"
 	"github.com/mendesbarreto/go-my-coffe-shop/pkg/infra"
 	"github.com/mendesbarreto/go-my-coffe-shop/pkg/interceptor"
+	"github.com/mendesbarreto/go-my-coffe-shop/pkg/logger"
+	"github.com/mendesbarreto/go-my-coffe-shop/proto/gen"
 )
 
 func main() {
@@ -47,14 +52,20 @@ func main() {
 
 	lis, err := net.Listen(network, serverAddress)
 	if err != nil {
-		slog.Info("Failed to start listen to address", err, "network", network, "serverAddress", serverAddress)
+		slog.Error("Failed to start listen to address", err, "network", network, "serverAddress", serverAddress)
 		cancel()
 		infra.CleanUpDependcies(ctx)
 		<-ctx.Done()
 	}
 
-	slog.Info("User Module Server", "listen", serverAddress)
+	go func() {
+		err := grpcServer.Serve(lis)
+		if err != nil {
+			slog.Error("Problem to initialize grpc server", "message=", err.Error())
+		}
+	}()
 
+	slog.Info("User Module Server", "listen", serverAddress)
 	defer func() {
 		if err := lis.Close(); err != nil {
 			slog.Error("Problem to close server", err, "network", network, "address", serverAddress)
@@ -62,6 +73,36 @@ func main() {
 		cancel()
 		infra.CleanUpDependcies(ctx)
 		<-ctx.Done()
+	}()
+
+	// Create mux for grPC Gateway
+	mux := runtime.NewServeMux()
+
+	conn, err := grpc.DialContext(context.Background(), serverAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	err = gen.RegisterUserServiceHandler(context.Background(), mux, conn)
+
+	if err != nil {
+		slog.Error("Problem to start grpc Gateway", "error message=", err.Error())
+	}
+
+	restServer := http.Server{
+		Handler: logger.WithLogger(mux),
+	}
+
+	// TODO: Add the port to the configuration file from module user
+	slog.Info("Start to listen :8081")
+	restLis, err := net.Listen(network, "0.0.0.0:8081")
+	if err != nil {
+		slog.Error("Problem to start listens port 8081 maybe the port is in user", "error message=", err.Error())
+	}
+
+	err = restServer.Serve(restLis)
+	if err != nil {
+		slog.Error("Problem to start listens port 8081 maybe the port is in user", "error message=", err.Error())
+	}
+
+	defer func() {
+		conn.Close()
 	}()
 
 	err = grpcServer.Serve(lis)

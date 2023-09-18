@@ -16,6 +16,62 @@
     "application/json"
   ],
   "paths": {
+    "/v1/user/:id/details": {
+      "get": {
+        "summary": "Get user Details",
+        "description": "This method will return all the information needed about the user",
+        "operationId": "UserService_GetUserDetails",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/userGetUserDetailsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "User"
+        ]
+      }
+    },
+    "/v1/user/hello": {
+      "get": {
+        "summary": "Get something",
+        "description": "Say Hello",
+        "operationId": "UserService_HelloWorld",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/userHelloRespose"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "User"
+        ]
+      }
+    },
     "/v1/user/signin": {
       "post": {
         "summary": "Sign in",
@@ -111,6 +167,25 @@
             "type": "object",
             "$ref": "#/definitions/protobufAny"
           }
+        }
+      }
+    },
+    "userGetUserDetailsResponse": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        }
+      }
+    },
+    "userHelloRespose": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string"
         }
       }
     },

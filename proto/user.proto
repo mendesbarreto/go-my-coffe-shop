@@ -31,7 +31,35 @@ message SignUpResponse {
   string token = 2;
 }
 
+message GetUserDetailsRequest {
+  string userId = 1 [(validate.rules).string = { max_bytes: 12 }];
+}
+
+message GetUserDetailsResponse {
+  string name = 1;
+  string email = 2;
+}
+
+message HelloRequest {
+
+}
+
+message HelloRespose {
+  string text = 1;
+}
+
 service UserService {
+ rpc HelloWorld(HelloRequest) returns (HelloRespose) {
+    option (google.api.http) = {
+      get: "/v1/user/hello"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Get something"
+      description: "Say Hello"
+      tags: "User"
+    };
+  };
+
  rpc SignUp(SignUpRequest) returns (SignUpResponse) {
     option (google.api.http) = {
       post: "/v1/user/signup"
@@ -53,5 +81,15 @@ service UserService {
       description: "Sign in"
       tags: "User"
     };
-  }
+  };
+ rpc GetUserDetails(GetUserDetailsRequest) returns (GetUserDetailsResponse) {
+    option (google.api.http) = {
+      get: "/v1/user/:id/details"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Get user Details"
+      description: "This method will return all the information needed about the user"
+      tags: "User"
+    };
+  };
 }
