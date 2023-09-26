@@ -27,12 +27,14 @@ var publicMethods []string = []string{
 }
 
 func main() {
-	//
-	// This function is used to keep the number of operating system threads that can execute user-level Go code at any one time.
-	// When Go starts it's automatically set the number of thread to max available on the system. That means the number of goroutines that can actually run in parallel.
-	// In Kubernetes, all the available CPU cores on the node are visible by its pods If you set a pod CPU limit to 1 core
-	// but your node has 64 cores of CPU, your Go app will grab the actual node resource and set GOMAXPROC to 64
-	// So the maxprocs Set() helps to assign only the number of cores available for the pod.
+	//This function serves to control the maximum number of operating system threads that can concurrently execute user-level Go code. 
+	//When a Go program starts, it automatically sets the number of threads to the maximum available on the system. 
+	//This effectively determines the number of Goroutines that can run in parallel.
+
+	//In Kubernetes, all the CPU cores available on a node are visible to its pods. If you set a pod's CPU limit to 1 core, 
+	//but your node has 64 CPU cores, your Go application will utilize the full node resources and set GOMAXPROCS to 64.
+
+	//The purpose of maxprocs.Set() is to ensure that only the number of CPU cores available to the pod is allocated for execution
 	_, err := maxprocs.Set()
 	if err != nil {
 		slog.Error("Problem to set the threads available on the system", err)
