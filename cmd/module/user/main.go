@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net"
 	"net/http"
 	"time"
@@ -11,15 +12,19 @@ import (
 	"go.uber.org/automaxprocs/maxprocs"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"log/slog"
 
 	"github.com/mendesbarreto/go-my-coffe-shop/cmd/module/user/config"
-	handler "github.com/mendesbarreto/go-my-coffe-shop/internal/user"
+	"github.com/mendesbarreto/go-my-coffe-shop/internal/user/handler"
+	"github.com/mendesbarreto/go-my-coffe-shop/pkg/auth"
 	"github.com/mendesbarreto/go-my-coffe-shop/pkg/infra"
-	"github.com/mendesbarreto/go-my-coffe-shop/pkg/interceptor"
 	"github.com/mendesbarreto/go-my-coffe-shop/pkg/logger"
 	"github.com/mendesbarreto/go-my-coffe-shop/proto/gen"
 )
+
+var publicMethods []string = []string{
+	"/api.v1.mycoffeshop.user.UserService/SignIn",
+	"/api.v1.mycoffeshop.user.UserService/SignUp",
+}
 
 func main() {
 	//
@@ -43,9 +48,13 @@ func main() {
 	infra.SetupDependecies(ctx, config)
 	slog.Info("User Module Config loaded", config)
 
-	loggerInterceptor := grpc.UnaryInterceptor(interceptor.GetUnaryGrpcInterceptor())
-	grpcServer := grpc.NewServer(loggerInterceptor)
-	serverAddress := fmt.Sprintf("%s:%s", config.Grcp.Host, config.Grcp.Port)
+	grpcServer := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(
+			auth.GetUnaryGrpcInterceptor(publicMethods),
+			logger.GetUnaryGrpcInterceptor(),
+		),
+	)
+	serverAddress := fmt.Sprintf("%s:%s", config.Host, config.Port)
 	network := "tcp"
 
 	handler.NewUserGRPCHandler(grpcServer, config)
