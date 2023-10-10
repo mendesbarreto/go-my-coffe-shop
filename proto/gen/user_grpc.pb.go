@@ -22,6 +22,7 @@ const (
 	UserService_HelloWorld_FullMethodName     = "/api.v1.mycoffeshop.user.UserService/HelloWorld"
 	UserService_SignUp_FullMethodName         = "/api.v1.mycoffeshop.user.UserService/SignUp"
 	UserService_SignIn_FullMethodName         = "/api.v1.mycoffeshop.user.UserService/SignIn"
+	UserService_GetMe_FullMethodName          = "/api.v1.mycoffeshop.user.UserService/GetMe"
 	UserService_GetUserDetails_FullMethodName = "/api.v1.mycoffeshop.user.UserService/GetUserDetails"
 )
 
@@ -32,6 +33,7 @@ type UserServiceClient interface {
 	HelloWorld(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (*HelloRespose, error)
 	SignUp(ctx context.Context, in *SignUpRequest, opts ...grpc.CallOption) (*SignUpResponse, error)
 	SignIn(ctx context.Context, in *SignInRequest, opts ...grpc.CallOption) (*SignInResponse, error)
+	GetMe(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (*GetUserDetailsResponse, error)
 	GetUserDetails(ctx context.Context, in *GetUserDetailsRequest, opts ...grpc.CallOption) (*GetUserDetailsResponse, error)
 }
 
@@ -70,6 +72,15 @@ func (c *userServiceClient) SignIn(ctx context.Context, in *SignInRequest, opts 
 	return out, nil
 }
 
+func (c *userServiceClient) GetMe(ctx context.Context, in *EmptyRequest, opts ...grpc.CallOption) (*GetUserDetailsResponse, error) {
+	out := new(GetUserDetailsResponse)
+	err := c.cc.Invoke(ctx, UserService_GetMe_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *userServiceClient) GetUserDetails(ctx context.Context, in *GetUserDetailsRequest, opts ...grpc.CallOption) (*GetUserDetailsResponse, error) {
 	out := new(GetUserDetailsResponse)
 	err := c.cc.Invoke(ctx, UserService_GetUserDetails_FullMethodName, in, out, opts...)
@@ -86,6 +97,7 @@ type UserServiceServer interface {
 	HelloWorld(context.Context, *HelloRequest) (*HelloRespose, error)
 	SignUp(context.Context, *SignUpRequest) (*SignUpResponse, error)
 	SignIn(context.Context, *SignInRequest) (*SignInResponse, error)
+	GetMe(context.Context, *EmptyRequest) (*GetUserDetailsResponse, error)
 	GetUserDetails(context.Context, *GetUserDetailsRequest) (*GetUserDetailsResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
@@ -102,6 +114,9 @@ func (UnimplementedUserServiceServer) SignUp(context.Context, *SignUpRequest) (*
 }
 func (UnimplementedUserServiceServer) SignIn(context.Context, *SignInRequest) (*SignInResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SignIn not implemented")
+}
+func (UnimplementedUserServiceServer) GetMe(context.Context, *EmptyRequest) (*GetUserDetailsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMe not implemented")
 }
 func (UnimplementedUserServiceServer) GetUserDetails(context.Context, *GetUserDetailsRequest) (*GetUserDetailsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserDetails not implemented")
@@ -173,6 +188,24 @@ func _UserService_SignIn_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_GetMe_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EmptyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetMe(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetMe_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetMe(ctx, req.(*EmptyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _UserService_GetUserDetails_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetUserDetailsRequest)
 	if err := dec(in); err != nil {
@@ -209,6 +242,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SignIn",
 			Handler:    _UserService_SignIn_Handler,
+		},
+		{
+			MethodName: "GetMe",
+			Handler:    _UserService_GetMe_Handler,
 		},
 		{
 			MethodName: "GetUserDetails",

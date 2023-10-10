@@ -26,10 +26,10 @@ type UserGRPCHandler struct {
 var userGRPCHandler *UserGRPCHandler
 
 type User struct {
-	ID       primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
 	Name     string             `json:"name,omitempty" bson:"name,omitempty"`
 	Email    string             `json:"email,omitempty" bson:"email,omitempty"`
 	Password string             `json:"password,omitempty" bson:"password"`
+	ID       primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
 }
 
 func NewUserGRPCHandler(grpcServer *grpc.Server, config *config.Config) *UserGRPCHandler {
@@ -76,6 +76,15 @@ func (u *UserGRPCHandler) SignIn(ctx context.Context, req *gen.SignInRequest) (*
 	}
 
 	return &gen.SignInResponse{Token: tokenString}, nil
+}
+
+func (u *UserGRPCHandler) GetMe(ctx context.Context, req *gen.EmptyRequest) (*gen.GetUserDetailsResponse, error) {
+	err := req.ValidateAll()
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	return nil, status.Error(codes.NotFound, "This method was not implemented yet")
 }
 
 func (u *UserGRPCHandler) SignUp(ctx context.Context, req *gen.SignUpRequest) (*gen.SignUpResponse, error) {

@@ -72,6 +72,30 @@
         ]
       }
     },
+    "/v1/user/me": {
+      "get": {
+        "summary": "Get Me",
+        "description": "Get my user information details",
+        "operationId": "UserService_GetMe",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/userGetUserDetailsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "Details"
+        ]
+      }
+    },
     "/v1/user/signin": {
       "post": {
         "summary": "Sign in",
@@ -173,6 +197,9 @@
     "userGetUserDetailsResponse": {
       "type": "object",
       "properties": {
+        "userId": {
+          "type": "string"
+        },
         "name": {
           "type": "string"
         },
