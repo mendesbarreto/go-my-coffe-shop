@@ -15,7 +15,8 @@ import (
 )
 
 func getJWT(md metadata.MD) (*string, error) {
-	authHeaders, exists := md["Authorization"]
+	authHeaders, exists := md["grpcgateway-authorization"]
+
 	if !exists || len(authHeaders) == 0 || len(authHeaders[0]) == 0 {
 		return nil, status.Error(codes.Unauthenticated, "No Authorization bearer was found")
 	}
@@ -62,7 +63,13 @@ func GetUnaryGrpcInterceptor(methods []string) grpc.UnaryServerInterceptor {
 			return nil, status.Errorf(codes.Unauthenticated, "The token providade is invalid: %v", err.Error())
 		}
 
-		slog.Info("[Authorization]", "jwt=", token.Raw)
+		clains, err := token.Claims.GetAudience()
+
+		if err != nil {
+			return nil, status.Errorf(codes.Unauthenticated, "The token providade does not have any clains %v", err.Error())
+		}
+
+		slog.Info("[Authorization]", "jwt=", token.Raw, "user=", clains)
 
 		return handler(ctx, req)
 	}
