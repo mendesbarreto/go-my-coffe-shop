@@ -35,4 +35,4 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20231002182017-d307bd883b97 // indirect
 )
 
-replace google.golang.org/grpc => github.com/grpc/grpc-go v1.58.3
+replace google.golang.org/grpc => github.com/grpc/grpc-go v1.59.0
