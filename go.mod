@@ -3,6 +3,7 @@ module github.com/mendesbarreto/go-my-coffe-shop
 go 1.20
 
 require (
+	github.com/caarlos0/env/v10 v10.0.0
 	github.com/caarlos0/env/v9 v9.0.0
 	github.com/envoyproxy/protoc-gen-validate v1.0.2
 	github.com/felixge/httpsnoop v1.0.3
