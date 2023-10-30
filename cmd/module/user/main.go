@@ -27,14 +27,14 @@ var publicMethods []string = []string{
 }
 
 func main() {
-	//This function serves to control the maximum number of operating system threads that can concurrently execute user-level Go code. 
-	//When a Go program starts, it automatically sets the number of threads to the maximum available on the system. 
-	//This effectively determines the number of Goroutines that can run in parallel.
+	// This function serves to control the maximum number of operating system threads that can concurrently execute user-level Go code.
+	// When a Go program starts, it automatically sets the number of threads to the maximum available on the system.
+	// This effectively determines the number of Goroutines that can run in parallel.
 
-	//In Kubernetes, all the CPU cores available on a node are visible to its pods. If you set a pod's CPU limit to 1 core, 
-	//but your node has 64 CPU cores, your Go application will utilize the full node resources and set GOMAXPROCS to 64.
+	// In Kubernetes, all the CPU cores available on a node are visible to its pods. If you set a pod's CPU limit to 1 core,
+	// but your node has 64 CPU cores, your Go application will utilize the full node resources and set GOMAXPROCS to 64.
 
-	//The purpose of maxprocs.Set() is to ensure that only the number of CPU cores available to the pod is allocated for execution
+	// The purpose of maxprocs.Set() is to ensure that only the number of CPU cores available to the pod is allocated for execution
 	_, err := maxprocs.Set()
 	if err != nil {
 		slog.Error("Problem to set the threads available on the system", err)
@@ -90,6 +90,10 @@ func main() {
 	mux := runtime.NewServeMux()
 
 	conn, err := grpc.DialContext(context.Background(), serverAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		slog.Error("Problem to start grpc Gateway", "error message=", err.Error())
+	}
+
 	err = gen.RegisterUserServiceHandler(context.Background(), mux, conn)
 
 	if err != nil {
