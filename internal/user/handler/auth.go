@@ -2,11 +2,12 @@ package handler
 
 import (
 	"context"
+	"time"
 
-	"github.com/golang-jwt/jwt/v5"
-	"github.com/mendesbarreto/go-my-coffe-shop/cmd/module/user/config"
 	"github.com/mendesbarreto/go-my-coffe-shop/internal/user/model"
+	"github.com/mendesbarreto/go-my-coffe-shop/internal/user/util"
 	"github.com/mendesbarreto/go-my-coffe-shop/pkg/infra/db"
+	"github.com/mendesbarreto/go-my-coffe-shop/pkg/infra/redis"
 	"github.com/mendesbarreto/go-my-coffe-shop/proto/gen"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -15,6 +16,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
+
+const tokenExpirationTimeHours time.Duration = 48 * time.Hour
 
 func (u *UserGRPCHandler) SignIn(ctx context.Context, req *gen.SignInRequest) (*gen.SignInResponse, error) {
 	err := req.ValidateAll()
@@ -33,12 +36,16 @@ func (u *UserGRPCHandler) SignIn(ctx context.Context, req *gen.SignInRequest) (*
 		}
 	}
 
-	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.GetPassword())); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.GetPassword())); err != nil {
 		return nil, status.Error(codes.PermissionDenied, "The user or the password does not match the database")
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{"user": model.User{ID: user.ID, Name: user.Name, Email: user.Email}})
 
-	tokenString, err := token.SignedString([]byte(config.GetConfig().AuthSecrete))
+	tokenString, err := util.GenerateJwt(user)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	err = redis.Save(ctx, tokenString, user, tokenExpirationTimeHours)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -52,7 +59,7 @@ func (u *UserGRPCHandler) SignUp(ctx context.Context, req *gen.SignUpRequest) (*
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	user := &model.User{}
+	var user *model.User = nil
 	userCollection := db.GetDatabase().Collection("user")
 	if userCollection == nil {
 		return nil, status.Error(codes.Internal, "Collection user was not found on the database")
@@ -75,12 +82,27 @@ func (u *UserGRPCHandler) SignUp(ctx context.Context, req *gen.SignUpRequest) (*
 		return nil, status.Error(codes.Internal, "Problem to generate user password")
 	}
 
-	user = &model.User{ID: primitive.NewObjectID(), Name: req.GetName(), Email: req.GetEmail(), Password: string(passwordHash)}
+	user = &model.User{
+		ID:       primitive.NewObjectID(),
+		Name:     req.GetName(),
+		Email:    req.GetEmail(),
+		Password: string(passwordHash),
+	}
 
 	_, err = userCollection.InsertOne(ctx, *user)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	return &gen.SignUpResponse{UserId: user.ID.String(), Token: "123"}, nil
+	tokenString, err := util.GenerateJwt(user)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	err = redis.Save(ctx, tokenString, user, tokenExpirationTimeHours)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &gen.SignUpResponse{UserId: user.ID.String(), Token: tokenString}, nil
 }

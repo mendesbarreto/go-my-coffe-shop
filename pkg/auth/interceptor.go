@@ -64,10 +64,11 @@ func GetUnaryGrpcInterceptor(methods []string) grpc.UnaryServerInterceptor {
 		}
 
 		clains, err := token.Claims.GetAudience()
-
 		if err != nil {
 			return nil, status.Errorf(codes.Unauthenticated, "The token providade does not have any clains %v", err.Error())
 		}
+
+		// TODO: HERE WE NEED TO FETCH THE USER. Maybe a Factory??
 
 		slog.Info("[Authorization]", "jwt=", token.Raw, "user=", clains)
 
