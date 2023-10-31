@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 	"strings"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"google.golang.org/grpc"
@@ -12,6 +13,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/mendesbarreto/go-my-coffe-shop/cmd/module/user/config"
+	"github.com/mendesbarreto/go-my-coffe-shop/pkg/infra/redis"
 )
 
 func getJWT(md metadata.MD) (*string, error) {
@@ -34,7 +36,7 @@ func hasNoAuthCheck(method string, methods []string) bool {
 	return false
 }
 
-func GetUnaryGrpcInterceptor(methods []string) grpc.UnaryServerInterceptor {
+func GetUnaryGrpcInterceptor(methods []string, getSessionValueToCache func() (interface{}, error)) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		if hasNoAuthCheck(info.FullMethod, methods) {
 			slog.Info("[Authorization] No auth needed for %v", info.FullMethod)
@@ -69,6 +71,12 @@ func GetUnaryGrpcInterceptor(methods []string) grpc.UnaryServerInterceptor {
 		}
 
 		// TODO: HERE WE NEED TO FETCH THE USER. Maybe a Factory??
+		valueToCache, err := getSessionValueToCache()
+		if err != nil {
+			return nil, status.Errorf(codes.Unauthenticated, "Problem to fetch user", err.Error())
+		}
+
+		err = redis.Save(ctx, *tokenString, valueToCache, 48*time.Hour)
 
 		slog.Info("[Authorization]", "jwt=", token.Raw, "user=", clains)
 
