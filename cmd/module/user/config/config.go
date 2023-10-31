@@ -24,11 +24,16 @@ type (
 		URI string `env-required:"true" env:"MONGO_URI" envDefault:"mongodb://192.168.2.32:27017/?directConnection=true"`
 	}
 
+	Redis struct {
+		URI string `env-required:"true" env:"REDIS_URI" envDefault:"192.168.2.32:6379"`
+	}
+
 	Config struct {
 		Module
 		Grcp
 		Log
 		MongoDb
+		Redis
 		EnableGRPCReflection bool `env:"ENABLE_GRPC_REFLECTION" envDefault:"true"`
 	}
 )
