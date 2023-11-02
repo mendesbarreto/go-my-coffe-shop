@@ -15,7 +15,7 @@ import (
 
 	"github.com/mendesbarreto/go-my-coffe-shop/cmd/module/user/config"
 	"github.com/mendesbarreto/go-my-coffe-shop/internal/user/handler"
-	"github.com/mendesbarreto/go-my-coffe-shop/internal/user/model"
+	"github.com/mendesbarreto/go-my-coffe-shop/internal/user/repository"
 	"github.com/mendesbarreto/go-my-coffe-shop/pkg/auth"
 	"github.com/mendesbarreto/go-my-coffe-shop/pkg/infra"
 	"github.com/mendesbarreto/go-my-coffe-shop/pkg/logger"
@@ -53,8 +53,8 @@ func main() {
 
 	grpcServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
-			auth.GetUnaryGrpcInterceptor(publicMethods, func() (interface{}, error) {
-				return model.User{}, nil
+			auth.GetUnaryGrpcInterceptor(publicMethods, func(ctx context.Context, userId string) (interface{}, error) {
+				return repository.GetUserById(ctx, userId)
 			}),
 			logger.GetUnaryGrpcInterceptor(),
 		),

@@ -4,10 +4,11 @@ import (
 	"context"
 	"time"
 
-	"github.com/mendesbarreto/go-my-coffe-shop/internal/user/model"
+	"github.com/mendesbarreto/go-my-coffe-shop/internal/user/repository"
 	"github.com/mendesbarreto/go-my-coffe-shop/internal/user/util"
 	"github.com/mendesbarreto/go-my-coffe-shop/pkg/infra/db"
 	"github.com/mendesbarreto/go-my-coffe-shop/pkg/infra/redis"
+	"github.com/mendesbarreto/go-my-coffe-shop/pkg/model"
 	"github.com/mendesbarreto/go-my-coffe-shop/proto/gen"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -25,15 +26,9 @@ func (u *UserGRPCHandler) SignIn(ctx context.Context, req *gen.SignInRequest) (*
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	user := &model.User{}
-	userCollection := db.GetDatabase().Collection("user")
-
-	err = userCollection.FindOne(ctx, bson.M{"email": req.GetEmail()}).Decode(user)
-
+	user, err := repository.GetUserByEmail(ctx, req.GetEmail())
 	if err != nil {
-		if err != mongo.ErrNoDocuments {
-			return nil, status.Error(codes.Internal, err.Error())
-		}
+		return nil, err
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.GetPassword())); err != nil {

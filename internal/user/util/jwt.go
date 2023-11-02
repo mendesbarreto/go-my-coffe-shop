@@ -5,7 +5,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/mendesbarreto/go-my-coffe-shop/cmd/module/user/config"
-	"github.com/mendesbarreto/go-my-coffe-shop/internal/user/model"
+	"github.com/mendesbarreto/go-my-coffe-shop/pkg/model"
 )
 
 func GenerateJwt(user *model.User) (string, error) {
@@ -13,7 +13,7 @@ func GenerateJwt(user *model.User) (string, error) {
 
 	token := jwt.NewWithClaims(
 		jwt.SigningMethodHS256,
-		model.UserModuleClains{
+		model.ModuleClaims{
 			RegisteredClaims: jwt.RegisteredClaims{
 				ExpiresAt: jwt.NewNumericDate(expTime),
 			},

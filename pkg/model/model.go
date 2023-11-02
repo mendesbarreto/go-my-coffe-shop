@@ -12,7 +12,7 @@ type User struct {
 	ID       primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
 }
 
-type UserModuleClains struct {
+type ModuleClaims struct {
 	jwt.RegisteredClaims
 	User User `json:"user"`
 }

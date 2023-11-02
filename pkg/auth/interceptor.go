@@ -13,6 +13,8 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/mendesbarreto/go-my-coffe-shop/cmd/module/user/config"
+	"github.com/mendesbarreto/go-my-coffe-shop/pkg/infra/redis"
+	"github.com/mendesbarreto/go-my-coffe-shop/pkg/model"
 )
 
 func getJWT(md metadata.MD) (*string, error) {
@@ -56,7 +58,7 @@ func GetDurationFromJWT(token *jwt.Token) (time.Duration, error) {
 	return time.Since(exp.Time).Abs(), nil
 }
 
-func GetUnaryGrpcInterceptor(methods []string, getSessionValueToCache func() (interface{}, error)) grpc.UnaryServerInterceptor {
+func GetUnaryGrpcInterceptor(methods []string, getValueToCacheByUserId func(cxt context.Context, userId string) (interface{}, error)) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		if hasNoAuthCheck(info.FullMethod, methods) {
 			slog.Info("[Authorization] No auth needed for %v", info.FullMethod)
@@ -74,7 +76,8 @@ func GetUnaryGrpcInterceptor(methods []string, getSessionValueToCache func() (in
 			return nil, err
 		}
 
-		token, err := jwt.Parse(*tokenString, func(t *jwt.Token) (interface{}, error) {
+		claims := &model.ModuleClaims{}
+		token, err := jwt.ParseWithClaims(*tokenString, claims, func(t *jwt.Token) (interface{}, error) {
 			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, status.Errorf(codes.Unauthenticated, "Unexpected signing method: %v", t.Header["alg"])
 			}
@@ -89,31 +92,23 @@ func GetUnaryGrpcInterceptor(methods []string, getSessionValueToCache func() (in
 			return nil, err
 		}
 
-		clains, ok := token.Claims.(jwt.MapClaims)
-		if !ok {
-			return nil, status.Errorf(codes.Unauthenticated, "The token providade does not have any clains %v", err.Error())
+		valueToCache, err := getValueToCacheByUserId(ctx, claims.User.ID.String())
+		slog.Info("<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>", valueToCache)
+		if err != nil {
+			return nil, status.Errorf(codes.Unauthenticated, "Problem to fetch user %v", err.Error())
 		}
 
-		clains["aud"]
+		redisCacheDuration, err := GetDurationFromJWT(token)
+		if err != nil {
+			return nil, status.Errorf(codes.Unauthenticated, "It was imposible to get the expiration from token %v", err.Error())
+		}
 
-		slog.Info(">>>>>>>>>>>>>>>>>>>> Clains: %v", clains["aud"])
+		err = redis.Save(ctx, *tokenString, valueToCache, redisCacheDuration)
+		if err != nil {
+			return nil, status.Errorf(codes.Unauthenticated, "It was impossible to use redis to save cache %v", err.Error())
+		}
 
-		// valueToCache, err := getSessionValueToCache()
-		// if err != nil {
-		// 	return nil, status.Errorf(codes.Unauthenticated, "Problem to fetch user %v", err.Error())
-		// }
-
-		// redisCacheDuration, err := GetDurationFromJWT(token)
-		// if err != nil {
-		// 	return nil, status.Errorf(codes.Unauthenticated, "It was imposible to get the expiration from token %v", err.Error())
-		// }
-
-		// err = redis.Save(ctx, *tokenString, valueToCache, redisCacheDuration)
-		// if err != nil {
-		// 	return nil, status.Errorf(codes.Unauthenticated, "It was impossible to use redis to save cache %v", err.Error())
-		// }
-
-		// slog.Info("[Authorization]", "jwt=", token.Raw, "user=", clains, "expDuration=", redisCacheDuration)
+		slog.Info("[Authorization]", "jwt=", token.Raw, "user=", claims.User, "expDuration=", redisCacheDuration)
 
 		return handler(ctx, req)
 	}
