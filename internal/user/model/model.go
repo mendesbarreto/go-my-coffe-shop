@@ -13,6 +13,6 @@ type User struct {
 }
 
 type UserModuleClains struct {
-	User User `json:"user"`
 	jwt.RegisteredClaims
+	User User `json:"user"`
 }

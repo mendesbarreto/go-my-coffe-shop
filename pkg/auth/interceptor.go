@@ -94,6 +94,8 @@ func GetUnaryGrpcInterceptor(methods []string, getSessionValueToCache func() (in
 			return nil, status.Errorf(codes.Unauthenticated, "The token providade does not have any clains %v", err.Error())
 		}
 
+		clains["aud"]
+
 		slog.Info(">>>>>>>>>>>>>>>>>>>> Clains: %v", clains["aud"])
 
 		// valueToCache, err := getSessionValueToCache()
