@@ -1,6 +1,7 @@
 package model
 
 import (
+	"github.com/golang-jwt/jwt/v5"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -9,4 +10,9 @@ type User struct {
 	Email    string             `json:"email,omitempty" bson:"email,omitempty"`
 	Password string             `json:"password,omitempty" bson:"password"`
 	ID       primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
+}
+
+type UserModuleClains struct {
+	User User `json:"user"`
+	jwt.RegisteredClaims
 }

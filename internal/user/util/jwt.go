@@ -13,13 +13,15 @@ func GenerateJwt(user *model.User) (string, error) {
 
 	token := jwt.NewWithClaims(
 		jwt.SigningMethodHS256,
-		jwt.MapClaims{
-			"user": model.User{
+		model.UserModuleClains{
+			RegisteredClaims: jwt.RegisteredClaims{
+				ExpiresAt: jwt.NewNumericDate(expTime),
+			},
+			User: model.User{
 				ID:    user.ID,
 				Name:  user.Name,
 				Email: user.Email,
 			},
-			"exp": expTime.Unix(),
 		})
 
 	tokenString, err := token.SignedString([]byte(config.GetConfig().AuthSecrete))

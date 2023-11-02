@@ -13,7 +13,6 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/mendesbarreto/go-my-coffe-shop/cmd/module/user/config"
-	"github.com/mendesbarreto/go-my-coffe-shop/pkg/infra/redis"
 )
 
 func getJWT(md metadata.MD) (*string, error) {
@@ -36,6 +35,27 @@ func hasNoAuthCheck(method string, methods []string) bool {
 	return false
 }
 
+func validateJWT(token *jwt.Token) error {
+	exp, err := token.Claims.GetExpirationTime()
+	if err != nil {
+		return err
+	}
+
+	if exp == nil || exp.Before(time.Now()) {
+		return status.Error(codes.Unauthenticated, "The token expired")
+	}
+
+	return nil
+}
+
+func GetDurationFromJWT(token *jwt.Token) (time.Duration, error) {
+	exp, err := token.Claims.GetExpirationTime()
+	if err != nil {
+		return 0, err
+	}
+	return time.Since(exp.Time).Abs(), nil
+}
+
 func GetUnaryGrpcInterceptor(methods []string, getSessionValueToCache func() (interface{}, error)) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		if hasNoAuthCheck(info.FullMethod, methods) {
@@ -46,7 +66,7 @@ func GetUnaryGrpcInterceptor(methods []string, getSessionValueToCache func() (in
 		md, ok := metadata.FromIncomingContext(ctx)
 
 		if !ok {
-			return nil, status.Error(codes.Unknown, "failed to get metadata from context")
+			return nil, status.Error(codes.Unknown, "Failed to get metadata from context")
 		}
 
 		tokenString, err := getJWT(md)
@@ -65,20 +85,33 @@ func GetUnaryGrpcInterceptor(methods []string, getSessionValueToCache func() (in
 			return nil, status.Errorf(codes.Unauthenticated, "The token providade is invalid: %v", err.Error())
 		}
 
-		clains, err := token.Claims.GetAudience()
-		if err != nil {
+		if err = validateJWT(token); err != nil {
+			return nil, err
+		}
+
+		clains, ok := token.Claims.(jwt.MapClaims)
+		if !ok {
 			return nil, status.Errorf(codes.Unauthenticated, "The token providade does not have any clains %v", err.Error())
 		}
 
-		// TODO: HERE WE NEED TO FETCH THE USER. Maybe a Factory??
-		valueToCache, err := getSessionValueToCache()
-		if err != nil {
-			return nil, status.Errorf(codes.Unauthenticated, "Problem to fetch user", err.Error())
-		}
+		slog.Info(">>>>>>>>>>>>>>>>>>>> Clains: %v", clains["aud"])
 
-		err = redis.Save(ctx, *tokenString, valueToCache, 48*time.Hour)
+		// valueToCache, err := getSessionValueToCache()
+		// if err != nil {
+		// 	return nil, status.Errorf(codes.Unauthenticated, "Problem to fetch user %v", err.Error())
+		// }
 
-		slog.Info("[Authorization]", "jwt=", token.Raw, "user=", clains)
+		// redisCacheDuration, err := GetDurationFromJWT(token)
+		// if err != nil {
+		// 	return nil, status.Errorf(codes.Unauthenticated, "It was imposible to get the expiration from token %v", err.Error())
+		// }
+
+		// err = redis.Save(ctx, *tokenString, valueToCache, redisCacheDuration)
+		// if err != nil {
+		// 	return nil, status.Errorf(codes.Unauthenticated, "It was impossible to use redis to save cache %v", err.Error())
+		// }
+
+		// slog.Info("[Authorization]", "jwt=", token.Raw, "user=", clains, "expDuration=", redisCacheDuration)
 
 		return handler(ctx, req)
 	}
