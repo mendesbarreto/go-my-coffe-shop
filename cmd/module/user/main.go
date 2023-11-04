@@ -11,20 +11,59 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"go.uber.org/automaxprocs/maxprocs"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/status"
 
 	"github.com/mendesbarreto/go-my-coffe-shop/cmd/module/user/config"
 	"github.com/mendesbarreto/go-my-coffe-shop/internal/user/handler"
 	"github.com/mendesbarreto/go-my-coffe-shop/internal/user/repository"
 	"github.com/mendesbarreto/go-my-coffe-shop/pkg/auth"
 	"github.com/mendesbarreto/go-my-coffe-shop/pkg/infra"
+	"github.com/mendesbarreto/go-my-coffe-shop/pkg/infra/redis"
 	"github.com/mendesbarreto/go-my-coffe-shop/pkg/logger"
+	"github.com/mendesbarreto/go-my-coffe-shop/pkg/model"
+	"github.com/mendesbarreto/go-my-coffe-shop/pkg/util"
 	"github.com/mendesbarreto/go-my-coffe-shop/proto/gen"
 )
 
 var publicMethods []string = []string{
 	"/api.v1.mycoffeshop.user.UserService/SignIn",
 	"/api.v1.mycoffeshop.user.UserService/SignUp",
+}
+
+func createUserContextAndCache(ctx context.Context, jwt string) (context.Context, error) {
+	claims := &model.ModuleClaims{}
+	err := redis.Get(ctx, jwt, claims)
+
+	if err == nil {
+		slog.Info("A redis cache was found: %v", claims.User)
+		return context.WithValue(ctx, "user", claims.User), nil
+	}
+
+	token, claims, err := util.DecodeJWT(jwt)
+	if err != nil {
+		return nil, err
+	}
+
+	updatedUser, err := repository.GetUserById(ctx, claims.User.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	cacheDuration, err := util.GetDurationFromJWT(token)
+	if err != nil {
+		return nil, status.Errorf(codes.Unauthenticated, "It was imposible to get the expiration from token %v", err.Error())
+	}
+
+	claims.User = *updatedUser
+	err = redis.Save(ctx, jwt, claims, cacheDuration)
+	if err != nil {
+		return nil, status.Errorf(codes.Unauthenticated, "It was impossible to use redis to save cache %v", err.Error())
+	}
+
+	slog.Info("[Authorization]", "jwt=", token.Raw, "user=", claims.User, "expDuration=", cacheDuration)
+	return context.WithValue(ctx, "user", claims.User), nil
 }
 
 func main() {
@@ -53,9 +92,7 @@ func main() {
 
 	grpcServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
-			auth.GetUnaryGrpcInterceptor(publicMethods, func(ctx context.Context, userId string) (interface{}, error) {
-				return repository.GetUserById(ctx, userId)
-			}),
+			auth.GetUnaryGrpcInterceptor(publicMethods, createUserContextAndCache),
 			logger.GetUnaryGrpcInterceptor(),
 		),
 	)

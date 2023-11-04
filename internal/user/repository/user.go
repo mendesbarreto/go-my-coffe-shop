@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"log/slog"
 
 	"github.com/mendesbarreto/go-my-coffe-shop/pkg/infra/db"
 	"github.com/mendesbarreto/go-my-coffe-shop/pkg/model"
@@ -17,15 +16,9 @@ func GetUserCollection() *mongo.Collection {
 	return db.GetDatabase().Collection("user")
 }
 
-func GetUserById(ctx context.Context, userId string) (*model.User, error) {
-	slog.Info("ID>>>>>>>>>>>>>>>> %v", userId)
-	objectId, err := primitive.ObjectIDFromHex(userId)
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
+func GetUserById(ctx context.Context, id primitive.ObjectID) (*model.User, error) {
 	user := &model.User{}
-	err = GetUserCollection().FindOne(ctx, bson.M{"_id": objectId}).Decode(user)
+	err := GetUserCollection().FindOne(ctx, bson.M{"_id": id}).Decode(user)
 	if err != nil {
 		if err != mongo.ErrNoDocuments {
 			return nil, status.Error(codes.Internal, err.Error())

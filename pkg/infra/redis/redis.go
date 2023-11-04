@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 var client *redis.Client
@@ -48,20 +50,36 @@ func Save(ctx context.Context, key string, value interface{}, expiration time.Du
 	return nil
 }
 
-func Get[T comparable](ctx context.Context, key string) (*T, error) {
+func HasKey(ctx context.Context, key string) bool {
 	b, err := GetRedisClient().Get(ctx, key).Result()
 	if err != nil {
-		return nil, err
+		return false
 	}
 
-	var value *T
+	if len(b) == 0 {
+		return false
+	}
+
+	return true
+}
+
+func Get(ctx context.Context, key string, value interface{}) error {
+	b, err := GetRedisClient().Get(ctx, key).Result()
+	if err != nil {
+		return err
+	}
+
+	if len(b) == 0 {
+		return status.Error(codes.NotFound, "Redis key was not found")
+	}
+
 	err = json.Unmarshal([]byte(b), value)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return value, nil
+	return nil
 }
 
 func Disconnect() {
