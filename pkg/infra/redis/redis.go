@@ -70,7 +70,7 @@ func Get(ctx context.Context, key string, value interface{}) error {
 	}
 
 	if len(b) == 0 {
-		return status.Error(codes.NotFound, "Redis key was not found")
+		return status.Error(codes.Internal, "Redis key was not found")
 	}
 
 	err = json.Unmarshal([]byte(b), value)
