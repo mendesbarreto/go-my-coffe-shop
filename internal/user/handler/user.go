@@ -25,7 +25,7 @@ func (u *UserGRPCHandler) GetMe(ctx context.Context, req *gen.EmptyRequest) (*ge
 	}
 
 	return &gen.GetUserDetailsResponse{
-		UserId: user.ID.String(),
+		UserId: user.ID.Hex(),
 		Name:   user.Name,
 		Email:  user.Email,
 	}, nil
