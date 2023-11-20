@@ -39,10 +39,7 @@ message GetUserDetailsResponse {
   string email = 3;
 }
 
-
-message EmptyRequest {
-
-}
+message EmptyRequest {}
 
 message HelloRequest {
 
