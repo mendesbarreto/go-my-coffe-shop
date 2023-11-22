@@ -10,6 +10,7 @@ import (
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/mendesbarreto/go-my-coffe-shop/cmd/module/product/config"
+	"github.com/mendesbarreto/go-my-coffe-shop/internal/product/client"
 	"github.com/mendesbarreto/go-my-coffe-shop/internal/product/handler"
 	"github.com/mendesbarreto/go-my-coffe-shop/pkg/auth"
 	"github.com/mendesbarreto/go-my-coffe-shop/pkg/infra"
@@ -18,6 +19,7 @@ import (
 	"github.com/mendesbarreto/go-my-coffe-shop/pkg/model"
 	"github.com/mendesbarreto/go-my-coffe-shop/pkg/util"
 	"github.com/mendesbarreto/go-my-coffe-shop/proto/gen"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.uber.org/automaxprocs/maxprocs"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -26,18 +28,6 @@ import (
 )
 
 var publicMethods []string = []string{}
-
-func GetUserServiceClient() (gen.UserServiceClient, error) {
-	// The WithInsecure enables the developer to connect localhost or http
-	// The WithBlock block any call to the server until the connectio is up
-	serverAddress := fmt.Sprintf("%s:%s", config.GetConfig().UserServiceHost, config.GetConfig().UserServicePort)
-	conn, err := grpc.DialContext(context.Background(), serverAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		return nil, err
-	}
-
-	conn.Close()
-}
 
 func createUserContextAndCache(ctx context.Context, jwt string) (context.Context, error) {
 	claims := &model.ModuleClaims{}
@@ -53,17 +43,38 @@ func createUserContextAndCache(ctx context.Context, jwt string) (context.Context
 		return nil, err
 	}
 
-	updatedUser, err := gen.NewUserServiceClient(grpc.ClientConnInterface{})
+	slog.Info("111111111111111>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+	userClient, err := client.GetUserServiceClient()
 	if err != nil {
 		return nil, err
 	}
 
+	if userClient == nil {
+		slog.Info("4533333333333333333333333>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+	}
+
+	slog.Info("22222222222222222222>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+	updatedUser, err := userClient.GetMe(ctx, nil, nil)
+	if err != nil || updatedUser == nil {
+		return nil, status.Errorf(codes.Unauthenticated, "User was not found %v", err.Error())
+	}
+
+	slog.Info("3333333333333333>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 	cacheDuration, err := util.GetDurationFromJWT(token)
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "It was imposible to get the expiration from token %v", err.Error())
 	}
 
-	claims.User = *updatedUser
+	userId, err := primitive.ObjectIDFromHex(updatedUser.GetUserId())
+	if err != nil || updatedUser == nil {
+		return nil, status.Errorf(codes.Unauthenticated, "It was imposible to get user id from service client %v", err.Error())
+	}
+
+	claims.User = model.User{
+		ID:    userId,
+		Name:  updatedUser.GetName(),
+		Email: updatedUser.GetEmail(),
+	}
 	err = redis.Save(ctx, jwt, claims, cacheDuration)
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "It was impossible to use redis to save cache %v", err.Error())
@@ -94,7 +105,7 @@ func main() {
 	slog.Info("User Module context created")
 	config := config.GetConfig()
 
-	infra.SetupDependecies(ctx, config)
+	infra.SetupDependecies(ctx, config.Name, config.MongoDb.URI, config.Redis.URI)
 	slog.Info("User Module Config loaded", config)
 
 	grpcServer := grpc.NewServer(
@@ -141,7 +152,7 @@ func main() {
 		slog.Error("Problem to start grpc Gateway", "error message=", err.Error())
 	}
 
-	err = gen.RegisterUserServiceHandler(context.Background(), mux, conn)
+	err = gen.RegisterProductServiceHandler(context.Background(), mux, conn)
 
 	if err != nil {
 		slog.Error("Problem to start grpc Gateway", "error message=", err.Error())
@@ -153,14 +164,14 @@ func main() {
 
 	// TODO: Add the port to the configuration file from module user
 	slog.Info("Start to listen :8082")
-	restLis, err := net.Listen(network, "0.0.0.0:8081")
+	restLis, err := net.Listen(network, "0.0.0.0:8082")
 	if err != nil {
-		slog.Error("Problem to start listens port 8081 maybe the port is in user", "error message=", err.Error())
+		slog.Error("Problem to start listens port 8082 maybe the port is in user", "error message=", err.Error())
 	}
 
 	err = restServer.Serve(restLis)
 	if err != nil {
-		slog.Error("Problem to start listens port 8081 maybe the port is in user", "error message=", err.Error())
+		slog.Error("Problem to start listens port 8082 maybe the port is in user", "error message=", err.Error())
 	}
 
 	defer func() {

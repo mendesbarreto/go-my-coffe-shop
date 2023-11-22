@@ -2,12 +2,10 @@ package db
 
 import (
 	"context"
+	"log/slog"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"log/slog"
-
-	"github.com/mendesbarreto/go-my-coffe-shop/cmd/module/user/config"
 )
 
 var (
@@ -15,28 +13,30 @@ var (
 	databaseName string
 )
 
-func New(ctx context.Context, config *config.Config) *mongo.Client {
+type DBConfig interface{}
+
+func New(ctx context.Context, uri string, dbName string) *mongo.Client {
 	if mongoClient != nil {
 		return mongoClient
 	}
 
-	opt := options.Client().ApplyURI(config.MongoDb.URI)
+	opt := options.Client().ApplyURI(uri)
 
 	client, err := mongo.Connect(ctx, opt)
 	if err != nil {
-		slog.Error("Problem to connect with mongodb", "URI", config.MongoDb.URI)
+		slog.Error("Problem to connect with mongodb", "URI", uri)
 		panic(err)
 	}
 
 	slog.Info("Testing Mongo Connection")
 	if err = client.Ping(ctx, nil); err != nil {
-		slog.Error("Problem to connect with mongodb", "URI", config.MongoDb.URI)
+		slog.Error("Problem to connect with mongodb", "URI", uri)
 		panic(err)
 	}
 
-	databaseName = config.Name
+	databaseName = dbName
 
-	slog.Info("Mongo Client connection established at", "URI", config.MongoDb.URI)
+	slog.Info("Mongo Client connection established at", "URI", uri)
 	mongoClient = client
 
 	return client

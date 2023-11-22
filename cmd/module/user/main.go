@@ -87,8 +87,8 @@ func main() {
 	slog.Info("User Module context created")
 	config := config.GetConfig()
 
-	infra.SetupDependecies(ctx, config)
-	slog.Info("User Module Config loaded", config)
+	infra.SetupDependecies(ctx, config.Name, config.MongoDb.URI, config.Redis.URI)
+	slog.Info("User Module Config loaded=", config)
 
 	grpcServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
