@@ -24,11 +24,13 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
 var publicMethods []string = []string{}
 
+// TODO: Refactory code to remove all warnings
 func createUserContextAndCache(ctx context.Context, jwt string) (context.Context, error) {
 	claims := &model.ModuleClaims{}
 	err := redis.Get(ctx, jwt, claims)
@@ -43,23 +45,22 @@ func createUserContextAndCache(ctx context.Context, jwt string) (context.Context
 		return nil, err
 	}
 
-	slog.Info("111111111111111>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 	userClient, err := client.GetUserServiceClient()
 	if err != nil {
 		return nil, err
 	}
 
-	if userClient == nil {
-		slog.Info("4533333333333333333333333>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, status.Error(codes.NotFound, "Missing headers")
 	}
 
-	slog.Info("22222222222222222222>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-	updatedUser, err := userClient.GetMe(ctx, nil, nil)
+	outgoingCtx := metadata.NewOutgoingContext(ctx, md)
+	updatedUser, err := userClient.GetMe(outgoingCtx, &gen.EmptyRequest{})
 	if err != nil || updatedUser == nil {
 		return nil, status.Errorf(codes.Unauthenticated, "User was not found %v", err.Error())
 	}
 
-	slog.Info("3333333333333333>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 	cacheDuration, err := util.GetDurationFromJWT(token)
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "It was imposible to get the expiration from token %v", err.Error())

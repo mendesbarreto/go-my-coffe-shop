@@ -14,6 +14,8 @@ import (
 func getJWT(md metadata.MD) (*string, error) {
 	authHeaders, exists := md["grpcgateway-authorization"]
 
+	slog.Info("MD", md)
+
 	if !exists || len(authHeaders) == 0 || len(authHeaders[0]) == 0 {
 		return nil, status.Error(codes.Unauthenticated, "No Authorization bearer was found")
 	}
@@ -50,7 +52,7 @@ func GetUnaryGrpcInterceptor(methods []string,
 		if err != nil {
 			return nil, err
 		}
-
+		slog.Info("Creating context with cache")
 		ctx, err = createUserContextAndCache(ctx, *tokenString)
 		if err != nil {
 			return nil, err
