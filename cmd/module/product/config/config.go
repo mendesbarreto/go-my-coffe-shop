@@ -11,7 +11,7 @@ type (
 		AuthSecrete string `env:"SECRETE_AUTH_TOKEN" envDefault:"TopScrect"`
 	}
 
-	Grcp struct {
+	Server struct {
 		Host            string `env-required:"true" env:"GRCP_HOST" envDefault:"0.0.0.0"`
 		Port            string `env-required:"true" env:"GRCP_PORT" envDefault:"3002"`
 		RestPort        string `env-required:"true" env:"REST_PORT" envDefault:"8082"`
@@ -33,7 +33,7 @@ type (
 
 	Config struct {
 		Module
-		Grcp
+		Server
 		Log
 		MongoDb
 		Redis
