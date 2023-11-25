@@ -1,0 +1,46 @@
+syntax="proto3";
+
+package api.v1.mycoffeshop.barista;
+
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "validate/validate.proto";
+import "common.proto";
+import "product.proto";
+
+option go_package = "github.com/mendesbarreto/go-my-coffe-shop/proto/gen";
+
+message GetMenuRequest{
+  repeated string ids = 1;
+}
+
+message GetMenuResponse {
+  repeated api.v1.mycoffeshop.product.ProductDetails items = 1;
+}
+
+message OrderRequest {
+  string productId = 1;
+}
+message OrderResponse {}
+
+service BaristaService {
+  rpc GetMenu(GetMenuRequest) returns (GetMenuResponse) {
+    option (google.api.http) = {
+      get: "/v1/barista/menu"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Get a list of products"
+      tags: "Barista"
+    };
+  };
+
+  rpc Order(OrderRequest) returns (OrderResponse) {
+    option (google.api.http) = {
+      post: "/v1/barista/order"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Create a order"
+      tags: "Barista"
+    };
+  };
+}
