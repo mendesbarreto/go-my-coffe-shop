@@ -164,10 +164,11 @@ func main() {
 	}
 
 	// TODO: Add the port to the configuration file from module user
-	slog.Info("Start to listen :8082")
-	restLis, err := net.Listen(network, "0.0.0.0:8082")
+	restServerAddress := fmt.Sprintf("%s:%s", config.Host, config.RestPort)
+	slog.Info("Start to listen", "PORT", config.RestPort)
+	restLis, err := net.Listen(network, restServerAddress)
 	if err != nil {
-		slog.Error("Problem to start listens port 8082 maybe the port is in user", "error message=", err.Error())
+		slog.Error("Problem to start listens maybe the port is in use", "PORT", config.RestPort, "error message=", err.Error())
 	}
 
 	err = restServer.Serve(restLis)

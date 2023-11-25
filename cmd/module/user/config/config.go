@@ -12,8 +12,9 @@ type (
 	}
 
 	Grcp struct {
-		Host string `env-required:"true" env:"GRCP_HOST" envDefault:"0.0.0.0"`
-		Port string `env-required:"true" env:"GRCP_PORT" envDefault:"3000"`
+		Host     string `env-required:"true" env:"GRCP_HOST" envDefault:"0.0.0.0"`
+		Port     string `env-required:"true" env:"GRCP_PORT" envDefault:"3000"`
+		RestPort string `env-required:"true" env:"REST_PORT" envDefault:"8081"`
 	}
 
 	Log struct {

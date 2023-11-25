@@ -14,6 +14,7 @@ type (
 	Grcp struct {
 		Host            string `env-required:"true" env:"GRCP_HOST" envDefault:"0.0.0.0"`
 		Port            string `env-required:"true" env:"GRCP_PORT" envDefault:"3002"`
+		RestPort        string `env-required:"true" env:"REST_PORT" envDefault:"8082"`
 		UserServiceHost string `env-required:"true" env:"GRCP_USER_SERVICE_HOST" envDefault:"0.0.0.0"`
 		UserServicePort string `env-required:"true" env:"GRCP_USER_SERVICE_PORT" envDefault:"3000"`
 	}
