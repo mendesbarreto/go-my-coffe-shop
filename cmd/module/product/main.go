@@ -10,9 +10,9 @@ import (
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/mendesbarreto/go-my-coffe-shop/cmd/module/product/config"
-	"github.com/mendesbarreto/go-my-coffe-shop/internal/product/client"
 	"github.com/mendesbarreto/go-my-coffe-shop/internal/product/handler"
 	"github.com/mendesbarreto/go-my-coffe-shop/pkg/auth"
+	"github.com/mendesbarreto/go-my-coffe-shop/pkg/client"
 	"github.com/mendesbarreto/go-my-coffe-shop/pkg/infra"
 	"github.com/mendesbarreto/go-my-coffe-shop/pkg/infra/redis"
 	"github.com/mendesbarreto/go-my-coffe-shop/pkg/logger"
@@ -45,7 +45,8 @@ func createUserContextAndCache(ctx context.Context, jwt string) (context.Context
 		return nil, err
 	}
 
-	userClient, err := client.GetUserServiceClient()
+	config := config.GetConfig()
+	userClient, err := client.GetUserServiceClient(config.UserServiceHost, config.UserServicePort)
 	if err != nil {
 		return nil, err
 	}

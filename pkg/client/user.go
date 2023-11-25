@@ -15,13 +15,13 @@ import (
 
 var userServiceClient gen.UserServiceClient
 
-func GetUserServiceClient() (gen.UserServiceClient, error) {
+func GetUserServiceClient(host string, port string) (gen.UserServiceClient, error) {
 	if userServiceClient != nil {
 		return userServiceClient, nil
 	}
 	// The WithInsecure enables the developer to connect localhost or http
 	// The WithBlock block any call to the server until the connectio is up
-	serverAddress := fmt.Sprintf("%s:%s", config.GetConfig().UserServiceHost, config.GetConfig().UserServicePort)
+	serverAddress := fmt.Sprintf("%s:%s", host, port)
 	conn, err := grpc.DialContext(context.Background(), serverAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
