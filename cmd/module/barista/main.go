@@ -154,7 +154,7 @@ func main() {
 		slog.Error("Problem to start grpc Gateway", "error message=", err.Error())
 	}
 
-	err = gen.RegisterProductServiceHandler(context.Background(), mux, conn)
+	err = gen.RegisterBaristaServiceHandler(context.Background(), mux, conn)
 
 	if err != nil {
 		slog.Error("Problem to start grpc Gateway", "error message=", err.Error())
