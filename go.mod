@@ -9,7 +9,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.1.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.0
 	github.com/redis/go-redis/v9 v9.3.0
-	go.mongodb.org/mongo-driver v1.12.1
+	go.mongodb.org/mongo-driver v1.13.1
 	go.uber.org/automaxprocs v1.5.3
 	golang.org/x/crypto v0.15.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20231106174013-bbf56f31fb17
