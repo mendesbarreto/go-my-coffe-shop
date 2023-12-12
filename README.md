@@ -1,6 +1,6 @@
 # go-my-coffe-shop
 
-I will try to build a simple backend for a coffee shop in go
+The idea is to test technologies and build a simple backend for a coffee shop.
 
 ### Run the project
 

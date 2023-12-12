@@ -22,11 +22,11 @@ type (
 	}
 
 	MongoDb struct {
-		URI string `env-required:"true" env:"MONGO_URI" envDefault:"mongodb://192.168.2.32:27017/?directConnection=true"`
+		URI string `env-required:"true" env:"MONGO_URI" envDefault:"mongodb://minibeast:27017/?directConnection=true"`
 	}
 
 	Redis struct {
-		URI string `env-required:"true" env:"REDIS_URI" envDefault:"192.168.2.32:6379"`
+		URI string `env-required:"true" env:"REDIS_URI" envDefault:"minibeast:6379"`
 	}
 
 	Config struct {
