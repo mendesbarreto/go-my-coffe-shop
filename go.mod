@@ -1,8 +1,9 @@
 module github.com/mendesbarreto/go-my-coffe-shop
 
-go 1.20
+go 1.26.0
 
 require (
+	github.com/caarlos0/env/v11 v11.4.2
 	github.com/caarlos0/env/v9 v9.0.0
 	github.com/envoyproxy/protoc-gen-validate v1.0.2
 	github.com/felixge/httpsnoop v1.0.4
